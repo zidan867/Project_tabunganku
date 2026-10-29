@@ -15,7 +15,6 @@ project CRUD produk (Next.js App Router + MySQL Aiven + Vercel).
 - **Laporan**: tab Harian (31 hari terakhir), Mingguan (12 minggu, mulai Senin), Bulanan (12 bulan)
   dengan grafik batang, tabel setoran/penarikan/bersih, total, rata-rata, dan unduh CSV.
 - **Filter target**: klik "Fokus" pada sebuah target, atau pakai dropdown di laporan.
-- **Riwayat**: 30 transaksi terbaru, bisa dihapus.
 
 ## Struktur Project
 

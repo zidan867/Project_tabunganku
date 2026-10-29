@@ -28,7 +28,6 @@ export default function Home() {
   const [today, setToday] = useState(null);
   const [targets, setTargets] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [transaksi, setTransaksi] = useState([]);
   const [report, setReport] = useState([]);
   const [period, setPeriod] = useState('daily');
   const [filterTarget, setFilterTarget] = useState('');
@@ -68,15 +67,13 @@ export default function Home() {
   const loadAll = useCallback(async () => {
     if (!today) return;
     try {
-      const [t, s, h, r] = await Promise.all([
+      const [t, s, r] = await Promise.all([
         api('/api/target'),
         api(`/api/summary?today=${today}${tq}`),
-        api(`/api/transaksi?limit=30${tq}`),
         api(`/api/reports?period=${period}${tq}`),
       ]);
       setTargets(t);
       setSummary(s);
-      setTransaksi(h);
       setReport(r.rows);
       setXTarget((cur) => (cur && t.some((x) => String(x.id) === String(cur)) ? cur : t[0] ? String(t[0].id) : ''));
     } catch (err) {
@@ -114,16 +111,6 @@ export default function Home() {
       flash('error', err.message);
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function deleteTransaksi(id) {
-    if (!confirm('Hapus transaksi ini?')) return;
-    try {
-      await api(`/api/transaksi/${id}`, { method: 'DELETE' });
-      await loadAll();
-    } catch (err) {
-      flash('error', err.message);
     }
   }
 
@@ -202,8 +189,8 @@ export default function Home() {
     <main className="container">
       <header className="top">
         <div>
-          <h1>💰 Tabunganku</h1>
-          <p>Catat setoran, kejar target, dan pantau progresmu.</p>
+          <h1>Tabunganku</h1>
+          <p>Catat tabungan dan lihat perkembangannya.</p>
         </div>
         {today && <p>{formatDate(today)}</p>}
       </header>
@@ -458,34 +445,6 @@ export default function Home() {
         )}
       </section>
 
-      {/* Riwayat */}
-      <section className="card">
-        <h2>Riwayat terbaru{activeTarget ? ` · ${activeTarget.nama_target}` : ''}</h2>
-        {transaksi.length === 0 ? (
-          <div className="empty">{loading ? 'Memuat…' : 'Belum ada transaksi.'}</div>
-        ) : (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Waktu</th><th>Target</th><th>Keterangan</th><th className="num">Jumlah</th><th /></tr>
-              </thead>
-              <tbody>
-                {transaksi.map((x) => (
-                  <tr key={x.id}>
-                    <td>{formatDate(x.tanggal_transaksi.slice(0, 10))} · {x.tanggal_transaksi.slice(11, 16)}</td>
-                    <td>{x.nama_target}</td>
-                    <td>{x.keterangan || '—'}</td>
-                    <td className="num" style={{ color: x.jenis === 'penarikan' ? 'var(--danger)' : undefined }}>
-                      {x.jenis === 'penarikan' ? '−' : '+'}{rupiah(x.jumlah)}
-                    </td>
-                    <td className="num"><button className="danger" onClick={() => deleteTransaksi(x.id)}>Hapus</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
     </main>
   );
 }
